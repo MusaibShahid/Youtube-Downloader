@@ -1,0 +1,15 @@
+[project]
+name = "youtube-downloader"
+version = "0.1.0"
+description = "A modern web-based YouTube video downloader"
+dependencies = [
+    "Flask",
+    "Werkzeug",
+    "pytubefix>=10.0.0",
+    "moviepy",
+    "decorator",
+    "imageio",
+    "imageio-ffmpeg",
+    "requests"
+]
+requires-python = ">=3.12"
