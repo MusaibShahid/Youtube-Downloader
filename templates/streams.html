@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose Quality - YouTube Downloader</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --warning-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            --info-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            --glass-bg: rgba(255, 255, 255, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.18);
+        }
+        
+        body {
+            background: var(--primary-gradient);
+            min-height: 100vh;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%);
+            z-index: -1;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin-top: 30px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .card {
+            border-radius: 25px;
+            box-shadow: 
+                0 20px 40px rgba(0,0,0,0.1),
+                0 15px 12px rgba(0,0,0,0.08);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.85);
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 
+                0 25px 50px rgba(0,0,0,0.15),
+                0 20px 15px rgba(0,0,0,0.1);
+        }
+        
+        .card-header {
+            border-radius: 25px 25px 0 0 !important;
+            background: var(--primary-gradient);
+            color: white;
+            font-weight: 700;
+            font-size: 1.3rem;
+            padding: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shimmer 3s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        .btn-primary {
+            background: var(--primary-gradient);
+            border: none;
+            border-radius: 30px;
+            padding: 15px 35px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-success {
+            background: var(--success-gradient);
+            border: none;
+            border-radius: 30px;
+            padding: 15px 35px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-success::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn-success:hover::before {
+            left: 100%;
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(79, 172, 254, 0.4);
+        }
+        
+        .btn-secondary {
+            border-radius: 30px;
+            padding: 15px 35px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            background: var(--dark-gradient);
+            border: none;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(44, 62, 80, 0.4);
+        }
+        
+        .quality-card {
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            margin-bottom: 20px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            padding: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .quality-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s;
+        }
+        
+        .quality-card:hover::before {
+            left: 100%;
+        }
+        
+        .quality-card:hover {
+            border-color: #667eea;
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.3);
+        }
+        
+        .quality-card.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2));
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+        
+        .video-info {
+            background: var(--glass-bg);
+            border-radius: 20px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+        }
+        
+        .nav-pills .nav-link {
+            border-radius: 30px;
+            margin: 0 8px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 15px 25px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .nav-pills .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s;
+        }
+        
+        .nav-pills .nav-link:hover::before {
+            left: 100%;
+        }
+        
+        .nav-pills .nav-link.active {
+            background: var(--primary-gradient);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .display-6 {
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .quality-badge {
+            font-size: 1.3rem;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .size-badge {
+            background: var(--success-gradient);
+            color: white;
+            border-radius: 25px;
+            padding: 8px 20px;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+        }
+        
+        .text-white-50 {
+            color: rgba(255, 255, 255, 0.9) !important;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .text-primary {
+            color: #2c3e50 !important;
+            font-weight: 700;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+        }
+        
+        .text-success {
+            color: #27ae60 !important;
+            font-weight: 700;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+        }
+        
+        .text-info {
+            color: #2980b9 !important;
+            font-weight: 700;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+        }
+        
+        .text-warning {
+            color: #f39c12 !important;
+            font-weight: 700;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+        }
+        
+        .card-body h4 {
+            color: #2c3e50 !important;
+            font-weight: 700;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+        }
+        
+        .card-body p {
+            color: #2c3e50 !important;
+            font-weight: 600;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+        }
+        
+        .card-body small {
+            color: #34495e !important;
+            font-weight: 600;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+        }
+        
+        .alert-warning {
+            background: linear-gradient(135deg, rgba(67, 233, 123, 0.1), rgba(56, 249, 215, 0.1));
+            border-left: 4px solid #43e97b;
+            color: #2c3e50;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            transition: all 0.3s ease;
+        }
+        
+        .feature-icon:hover {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="text-center mb-4">
+            <h1 class="display-6 mb-3">
+                <i class="fas fa-video text-danger"></i> Choose Video Quality
+            </h1>
+            <p class="text-white-50">Select your preferred download option</p>
+        </div>
+
+        <!-- Video Info Card -->
+        <div class="card mb-4">
+            <div class="card-header text-center">
+                <h3><i class="fas fa-info-circle"></i> Video Information</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <img src="{{ yt.thumbnail_url }}" class="img-fluid rounded shadow" alt="Video Thumbnail">
+                    </div>
+                    <div class="col-md-8">
+                        <h4 class="text-primary">{{ yt.title }}</h4>
+                        <p class="text-muted mb-2">
+                            <i class="fas fa-user"></i> {{ yt.author }}<br>
+                            <i class="fas fa-eye"></i> {{ "{:,}".format(yt.views) }} views<br>
+                            <i class="fas fa-clock"></i> {{ "{:02d}:{:02d}".format(yt.length // 60, yt.length % 60) }}
+                        </p>
+                        <p class="text-muted">{{ yt.description[:200] }}{% if yt.description|length > 200 %}...{% endif %}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Download Options -->
+        <div class="card">
+            <div class="card-header text-center">
+                <h3><i class="fas fa-download"></i> Download Options</h3>
+                <p class="mb-0">Click on any option to download</p>
+            </div>
+            <div class="card-body">
+                <!-- Navigation Tabs -->
+                <ul class="nav nav-pills nav-justified mb-4" id="qualityTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="video-tab" data-bs-toggle="pill" data-bs-target="#video-panel" type="button" role="tab">
+                            <i class="fas fa-video"></i> Video + Audio
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="audio-tab" data-bs-toggle="pill" data-bs-target="#audio-panel" type="button" role="tab">
+                            <i class="fas fa-music"></i> Audio Only
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Tab Content -->
+                <div class="tab-content" id="qualityTabContent">
+                    <!-- Video + Audio Tab -->
+                    <div class="tab-pane fade show active" id="video-panel" role="tabpanel">
+                        {% if video_streams %}
+                            <div class="row">
+                                {% for stream in video_streams %}
+                                <div class="col-md-6 mb-3">
+                                    <div class="quality-card p-3" onclick="downloadStream('{{ url }}', '{{ stream.itag }}', '{{ stream.download_type }}')">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <span class="quality-badge text-primary">
+                                                    <i class="fas fa-hd-video"></i> {{ stream.resolution }}
+                                                </span>
+                                                <br>
+                                                <small class="text-muted">
+                                                    {{ stream.type }} • {{ stream.fps }}fps
+                                                </small>
+                                            </div>
+                                            <div class="text-end">
+                                                <span class="size-badge">{{ stream.size_mb }} MB</span>
+                                                <br>
+                                                <small class="text-success">
+                                                    <i class="fas fa-download"></i> Click to Download
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle"></i> No video streams available for this video.
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Audio Only Tab -->
+                    <div class="tab-pane fade" id="audio-panel" role="tabpanel">
+                        {% if audio_streams %}
+                            <div class="row">
+                                {% for stream in audio_streams %}
+                                <div class="col-md-6 mb-3">
+                                    <div class="quality-card p-3" onclick="downloadStream('{{ url }}', '{{ stream.itag }}', '{{ stream.download_type }}')">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <span class="quality-badge text-info">
+                                                    <i class="fas fa-music"></i> {{ stream.quality }}
+                                                </span>
+                                                <br>
+                                                <small class="text-muted">{{ stream.type }}</small>
+                                            </div>
+                                            <div class="text-end">
+                                                <span class="size-badge">{{ stream.size_mb }} MB</span>
+                                                <br>
+                                                <small class="text-success">
+                                                    <i class="fas fa-download"></i> Click to Download
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle"></i> No audio streams available for this video.
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Back Button -->
+                <div class="text-center mt-4">
+                    <a href="/" class="btn btn-secondary btn-lg">
+                        <i class="fas fa-arrow-left"></i> Back to Home
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Card -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-4">
+                        <i class="fas fa-magic fa-2x text-primary mb-2"></i>
+                        <h6>Auto-Merge</h6>
+                        <small class="text-muted">High-quality videos automatically merged with MoviePy</small>
+                    </div>
+                    <div class="col-md-4">
+                        <i class="fas fa-shield-alt fa-2x text-success mb-2"></i>
+                        <h6>No FFmpeg Required</h6>
+                        <small class="text-muted">Pure Python processing for maximum compatibility</small>
+                    </div>
+                    <div class="col-md-4">
+                        <i class="fas fa-file-signature fa-2x text-info mb-2"></i>
+                        <h6>Real Video Names</h6>
+                        <small class="text-muted">Downloads use actual video titles with quality info</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function downloadStream(url, itag, downloadType) {
+            // Add visual feedback
+            event.target.classList.add('selected');
+            
+            // Create form and submit
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/download';
+            
+            const urlInput = document.createElement('input');
+            urlInput.type = 'hidden';
+            urlInput.name = 'url';
+            urlInput.value = url;
+            
+            const itagInput = document.createElement('input');
+            itagInput.type = 'hidden';
+            itagInput.name = 'itag';
+            itagInput.value = itag;
+            
+            const typeInput = document.createElement('input');
+            typeInput.type = 'hidden';
+            typeInput.name = 'download_type';
+            typeInput.value = downloadType;
+            
+            form.appendChild(urlInput);
+            form.appendChild(itagInput);
+            form.appendChild(typeInput);
+            
+            document.body.appendChild(form);
+            form.submit();
+        }
+
+        // Add hover effects
+        document.querySelectorAll('.quality-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-3px)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                if (!this.classList.contains('selected')) {
+                    this.style.transform = 'translateY(0)';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

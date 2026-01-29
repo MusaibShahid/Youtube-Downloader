@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Downloader - Complete Edition</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --warning-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            --info-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            --dark-gradient: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            --glass-bg: rgba(255, 255, 255, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.18);
+        }
+        
+        body {
+            background: var(--primary-gradient);
+            min-height: 100vh;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%);
+            z-index: -1;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin-top: 30px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .card {
+            border-radius: 25px;
+            box-shadow: 
+                0 20px 40px rgba(0,0,0,0.1),
+                0 15px 12px rgba(0,0,0,0.08);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.85);
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 
+                0 25px 50px rgba(0,0,0,0.15),
+                0 20px 15px rgba(0,0,0,0.1);
+        }
+        
+        .btn-primary {
+            background: var(--primary-gradient);
+            border: none;
+            border-radius: 30px;
+            padding: 15px 35px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-success {
+            background: var(--success-gradient);
+            border: none;
+            border-radius: 30px;
+            padding: 15px 35px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-success::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn-success:hover::before {
+            left: 100%;
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(79, 172, 254, 0.4);
+        }
+        
+        .nav-pills .nav-link {
+            border-radius: 30px;
+            margin: 0 8px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 15px 25px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .nav-pills .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s;
+        }
+        
+        .nav-pills .nav-link:hover::before {
+            left: 100%;
+        }
+        
+        .nav-pills .nav-link.active {
+            background: var(--primary-gradient);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .form-control {
+            border-radius: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 18px 25px;
+            font-size: 1.1rem;
+            background: rgba(255, 255, 255, 0.9);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 
+                0 0 0 0.2rem rgba(102, 126, 234, 0.25),
+                0 8px 25px rgba(102, 126, 234, 0.15);
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+        
+        .alert {
+            border-radius: 20px;
+            border: none;
+            backdrop-filter: blur(10px);
+            font-weight: 500;
+        }
+        
+        .display-4 {
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .feature-icon {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            transition: all 0.3s ease;
+        }
+        
+        .feature-icon:hover {
+            transform: scale(1.1);
+        }
+        
+        .progress {
+            border-radius: 25px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        .progress-bar {
+            border-radius: 25px;
+            background: var(--success-gradient);
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+        }
+        
+        .card-header {
+            border-radius: 25px 25px 0 0 !important;
+            background: var(--primary-gradient);
+            color: white;
+            font-weight: 700;
+            font-size: 1.3rem;
+            padding: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shimmer 3s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        .text-white-50 {
+            color: rgba(255, 255, 255, 0.9) !important;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .lead {
+            font-weight: 600;
+            font-size: 1.2rem;
+            color: #2c3e50;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+        }
+        
+        .form-label {
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+        }
+        
+        .form-text {
+            color: #34495e;
+            font-weight: 600;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+        }
+        
+        .text-primary {
+            color: #2c3e50 !important;
+            font-weight: 700;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+        }
+        
+        .text-success {
+            color: #27ae60 !important;
+            font-weight: 700;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+        }
+        
+        .text-info {
+            color: #2980b9 !important;
+            font-weight: 700;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+        }
+        
+        .text-warning {
+            color: #f39c12 !important;
+            font-weight: 700;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+        }
+        
+        .card-body h6 {
+            color: #2c3e50 !important;
+            font-weight: 700;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+        }
+        
+        .card-body small {
+            color: #34495e !important;
+            font-weight: 600;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+        }
+        
+        .card-body p {
+            color: #2c3e50 !important;
+            font-weight: 600;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+        }
+        
+        .card-body h4 {
+            color: #2c3e50 !important;
+            font-weight: 700;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+        }
+        
+        .card-body h5 {
+            color: #2c3e50 !important;
+            font-weight: 700;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+        }
+        
+        .alert-success {
+            background: linear-gradient(135deg, rgba(79, 172, 254, 0.1), rgba(0, 242, 254, 0.1));
+            border-left: 4px solid #4facfe;
+            color: #2c3e50;
+        }
+        
+        .alert-info {
+            background: linear-gradient(135deg, rgba(250, 112, 154, 0.1), rgba(254, 225, 64, 0.1));
+            border-left: 4px solid #fa709a;
+            color: #2c3e50;
+        }
+        
+        .alert-warning {
+            background: linear-gradient(135deg, rgba(67, 233, 123, 0.1), rgba(56, 249, 215, 0.1));
+            border-left: 4px solid #43e97b;
+            color: #2c3e50;
+        }
+        
+        .alert-danger {
+            background: linear-gradient(135deg, rgba(245, 87, 108, 0.1), rgba(240, 147, 251, 0.1));
+            border-left: 4px solid #f5576c;
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="text-center mb-4">
+            <h1 class="display-4 mb-3">
+                <i class="fas fa-video text-danger"></i> YouTube Tools
+            </h1>
+            <p class="text-white-50 lead">Download videos or merge audio/video files with ease</p>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="row justify-content-center mb-4">
+            <div class="col-md-8">
+                <ul class="nav nav-pills nav-justified" id="mainTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active text-white" id="download-tab" data-bs-toggle="pill" data-bs-target="#download-panel" type="button" role="tab">
+                            <i class="fab fa-youtube text-danger"></i> YouTube Downloader
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link text-white" id="merge-tab" data-bs-toggle="pill" data-bs-target="#merge-panel" type="button" role="tab">
+                            <i class="fas fa-layer-group text-success"></i> File Merger
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else 'info' }} alert-dismissible fade show" role="alert">
+                        <i class="fas fa-{{ 'exclamation-triangle' if category == 'error' else 'info-circle' }}"></i>
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="mainTabContent">
+            <!-- YouTube Downloader Panel -->
+            <div class="tab-pane fade show active" id="download-panel" role="tabpanel">
+                <!-- URL Input Card -->
+                <div class="card">
+                    <div class="card-header text-center">
+                        <h3><i class="fas fa-link"></i> YouTube Video Downloader</h3>
+                        <p class="mb-0">Enter a YouTube URL to see available download options</p>
+                        <small class="text-muted">
+                            <i class="fas fa-home"></i> Running on LOCAL device - using your resources only
+                        </small>
+                    </div>
+                    <div class="card-body p-5">
+                        <form action="/analyze" method="POST">
+                            <div class="mb-4">
+                                <label for="url" class="form-label">
+                                    <i class="fas fa-link text-primary"></i> YouTube URL
+                                </label>
+                                <input type="url" name="url" class="form-control" 
+                                       placeholder="https://www.youtube.com/watch?v=..." 
+                                       required autofocus>
+                                <div class="form-text">
+                                    Paste any YouTube video URL and click "Analyze Video" to see quality options
+                                </div>
+                            </div>
+                            
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-search"></i> Analyze Video
+                                </button>
+                            </div>
+                        </form>
+                        
+                        <!-- Download Path Info -->
+                        <div class="alert alert-info mt-4" style="background: linear-gradient(135deg, rgba(79, 172, 254, 0.1), rgba(0, 242, 254, 0.1)); border-left: 4px solid #4facfe; color: #2c3e50; font-weight: 600;">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="fas fa-folder-open me-2"></i>
+                                    <strong>Download Location:</strong> <code id="download-path">G:\youtube_downloader\downloads\</code>
+                                </div>
+                                <div>
+                                    <button class="btn btn-sm btn-outline-warning me-2" onclick="cleanupStorage('downloads')" title="Clean old files">
+                                        <i class="fas fa-broom"></i> Clean
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="showDirectorySelector('downloads')">
+                                        <i class="fas fa-edit"></i> Change
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Features -->
+                <div class="row mt-4">
+                    <div class="col-md-3 text-center">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <i class="fas fa-hd-video feature-icon"></i>
+                                <h6 class="text-primary">High Quality</h6>
+                                <small class="text-muted">Up to 4K/8K resolution with MoviePy merging</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <i class="fas fa-bolt feature-icon"></i>
+                                <h6 class="text-warning">Real-time Progress</h6>
+                                <small class="text-muted">Live download tracking with retry logic</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <i class="fas fa-layer-group feature-icon"></i>
+                                <h6 class="text-success">Auto-Merge</h6>
+                                <small class="text-muted">Automatic video+audio merging</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <i class="fas fa-music feature-icon"></i>
+                                <h6 class="text-info">Audio/Video</h6>
+                                <small class="text-muted">Separate downloads available</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Instructions -->
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h6 class="card-title">
+                            <i class="fas fa-info-circle text-info"></i> How to use YouTube Downloader:
+                        </h6>
+                        <ol class="mb-0">
+                            <li>Copy a YouTube video URL</li>
+                            <li>Paste it in the field above</li>
+                            <li>Click "Analyze Video"</li>
+                            <li>Choose your preferred quality</li>
+                            <li>Download the file with real video name</li>
+                        </ol>
+                        <div class="alert alert-success mt-3 mb-0">
+                            <i class="fas fa-magic"></i>
+                            <strong>New:</strong> High-quality videos are automatically merged using MoviePy - no FFmpeg required!
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- File Merger Panel -->
+            <div class="tab-pane fade" id="merge-panel" role="tabpanel">
+                <div class="card">
+                    <div class="card-header text-center">
+                        <h3><i class="fas fa-layer-group"></i> Audio + Video Merger</h3>
+                        <p class="mb-0">Upload separate audio and video files to merge them into one</p>
+                    </div>
+                    <div class="card-body p-5">
+                        <div id="merge-messages"></div>
+                        
+                        <form id="mergeForm" enctype="multipart/form-data">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="videoFile" class="form-label">
+                                            <i class="fas fa-video text-primary"></i> Video File
+                                        </label>
+                                        <input type="file" class="form-control" id="videoFile" name="video_file" 
+                                               accept="video/*,.mp4,.webm,.mkv" required>
+                                        <div class="form-text">Supported: MP4, WebM, MKV, etc.</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="audioFile" class="form-label">
+                                            <i class="fas fa-music text-info"></i> Audio File
+                                        </label>
+                                        <input type="file" class="form-control" id="audioFile" name="audio_file" 
+                                               accept="audio/*,.mp3,.wav,.aac,.m4a,.webm" required>
+                                        <div class="form-text">Supported: MP3, WAV, AAC, M4A, WebM, etc.</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="outputName" class="form-label">
+                                    <i class="fas fa-file-signature"></i> Output Filename (optional)
+                                </label>
+                                <input type="text" class="form-control" id="outputName" name="output_name" 
+                                       placeholder="Leave blank for auto-generated name">
+                                <div class="form-text">If empty, will use video filename with "_merged" suffix</div>
+                            </div>
+                            
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-success btn-lg" id="mergeBtn">
+                                    <i class="fas fa-layer-group"></i> Merge Files
+                                </button>
+                            </div>
+                        </form>
+                        
+                        <!-- Download Path Info -->
+                        <div class="alert alert-info mt-4" style="background: linear-gradient(135deg, rgba(79, 172, 254, 0.1), rgba(0, 242, 254, 0.1)); border-left: 4px solid #4facfe; color: #2c3e50; font-weight: 600;">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="fas fa-folder-open me-2"></i>
+                                    <strong>Merged Files Location:</strong> <code id="merged-path">G:\youtube_downloader\merged\</code>
+                                </div>
+                                <button class="btn btn-sm btn-outline-primary" onclick="showDirectorySelector('merged')">
+                                    <i class="fas fa-edit"></i> Change
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Progress Section -->
+                        <div id="mergeProgress" class="mt-4" style="display: none;">
+                            <div class="card border-info">
+                                <div class="card-body text-center">
+                                    <div id="mergeStatus">
+                                        <i class="fas fa-spinner fa-spin text-primary"></i>
+                                        <span>Processing files...</span>
+                                    </div>
+                                    <div class="progress mt-3" style="height: 25px;">
+                                        <div id="mergeProgressBar" class="progress-bar progress-bar-striped progress-bar-animated" 
+                                             role="progressbar" style="width: 0%">0%</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Download Section -->
+                        <div id="mergeComplete" class="mt-4" style="display: none;">
+                            <div class="card border-success">
+                                <div class="card-body text-center">
+                                    <h5 class="text-success">
+                                        <i class="fas fa-check-circle"></i> Merge Complete!
+                                    </h5>
+                                    <p>Your merged file is ready for download.</p>
+                                    <a id="downloadMergedBtn" href="#" class="btn btn-success btn-lg">
+                                        <i class="fas fa-download"></i> Download Merged File
+                                    </a>
+                                    <button type="button" class="btn btn-secondary ms-2" onclick="resetMergeForm()">
+                                        <i class="fas fa-redo"></i> Merge Another
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Merge Instructions -->
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h6 class="card-title">
+                            <i class="fas fa-info-circle text-info"></i> How to merge files:
+                        </h6>
+                        <ol class="mb-0">
+                            <li>Select a video file (without audio or with poor audio)</li>
+                            <li>Select an audio file (high quality audio track)</li>
+                            <li>Optionally set a custom output filename</li>
+                            <li>Click "Merge Files" and wait for processing</li>
+                            <li>Download the merged result</li>
+                        </ol>
+                        <div class="alert alert-info mt-3 mb-0">
+                            <i class="fas fa-lightbulb"></i>
+                            <strong>Tip:</strong> This tool works entirely with MoviePy - no FFmpeg installation required!
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Merge form functionality
+        document.getElementById('mergeForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const videoFile = document.getElementById('videoFile').files[0];
+            const audioFile = document.getElementById('audioFile').files[0];
+            const outputName = document.getElementById('outputName').value;
+            
+            if (!videoFile || !audioFile) {
+                showMergeMessage('Please select both video and audio files.', 'danger');
+                return;
+            }
+            
+            // Show progress
+            document.getElementById('mergeProgress').style.display = 'block';
+            document.getElementById('mergeComplete').style.display = 'none';
+            document.getElementById('mergeBtn').disabled = true;
+            
+            // Create FormData
+            const formData = new FormData();
+            formData.append('video_file', videoFile);
+            formData.append('audio_file', audioFile);
+            formData.append('output_name', outputName);
+            
+            // Update status
+            updateMergeStatus('Uploading files...', 10);
+            
+            // Send to server
+            fetch('/merge-files', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateMergeStatus('Processing files...', 50);
+                    checkMergeProgress(data.merge_id);
+                } else {
+                    throw new Error(data.error || 'Upload failed');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMergeMessage('Upload failed: ' + error.message, 'danger');
+                resetMergeProgress();
+            });
+        });
+        
+        function checkMergeProgress(mergeId) {
+            const checkInterval = setInterval(() => {
+                fetch(`/merge-progress/${mergeId}`)
+                .then(response => response.json())
+                .then(data => {
+                    updateMergeStatus(data.status, data.progress);
+                    
+                    if (data.status === 'completed') {
+                        clearInterval(checkInterval);
+                        showMergeComplete(data.download_url, data.filename);
+                    } else if (data.status === 'error') {
+                        clearInterval(checkInterval);
+                        showMergeMessage('Merge failed: ' + data.error, 'danger');
+                        resetMergeProgress();
+                    }
+                })
+                .catch(error => {
+                    console.error('Progress check error:', error);
+                    clearInterval(checkInterval);
+                    showMergeMessage('Progress check failed', 'danger');
+                    resetMergeProgress();
+                });
+            }, 1000);
+        }
+        
+        function updateMergeStatus(status, progress) {
+            document.getElementById('mergeStatus').innerHTML = `
+                <i class="fas fa-spinner fa-spin text-primary"></i>
+                <span>${status}</span>
+            `;
+            document.getElementById('mergeProgressBar').style.width = progress + '%';
+            document.getElementById('mergeProgressBar').textContent = progress + '%';
+        }
+        
+        function showMergeComplete(downloadUrl, filename) {
+            document.getElementById('mergeProgress').style.display = 'none';
+            document.getElementById('mergeComplete').style.display = 'block';
+            document.getElementById('downloadMergedBtn').href = downloadUrl;
+            document.getElementById('downloadMergedBtn').download = filename;
+        }
+        
+        function showMergeMessage(message, type) {
+            const alertClass = type === 'danger' ? 'alert-danger' : 'alert-success';
+            document.getElementById('merge-messages').innerHTML = `
+                <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+                    <i class="fas fa-${type === 'danger' ? 'exclamation-triangle' : 'check-circle'}"></i>
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+        }
+        
+        function resetMergeProgress() {
+            document.getElementById('mergeProgress').style.display = 'none';
+            document.getElementById('mergeBtn').disabled = false;
+        }
+        
+        function resetMergeForm() {
+            document.getElementById('mergeForm').reset();
+            document.getElementById('mergeProgress').style.display = 'none';
+            document.getElementById('mergeComplete').style.display = 'none';
+            document.getElementById('mergeBtn').disabled = false;
+            document.getElementById('merge-messages').innerHTML = '';
+        }
+        
+        // Directory selector functions
+        let currentDirectoryType = '';
+        
+        function showDirectorySelector(type) {
+            currentDirectoryType = type;
+            const modal = new bootstrap.Modal(document.getElementById('directoryModal'));
+            modal.show();
+            loadDrives();
+        }
+        
+        function loadDrives() {
+            fetch('/api/drives')
+                .then(response => response.json())
+                .then(drives => {
+                    const select = document.getElementById('driveSelect');
+                    select.innerHTML = '<option value="">Select a drive...</option>';
+                    
+                    drives.forEach(drive => {
+                        const option = document.createElement('option');
+                        option.value = drive.path;
+                        option.textContent = drive.display;
+                        select.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading drives:', error);
+                    document.getElementById('driveSelect').innerHTML = '<option value="">Error loading drives</option>';
+                });
+        }
+        
+        function saveDirectory() {
+            const driveSelect = document.getElementById('driveSelect');
+            const customPath = document.getElementById('customPath');
+            
+            let selectedPath = driveSelect.value || customPath.value.trim();
+            
+            if (!selectedPath) {
+                alert('Please select a drive or enter a custom path');
+                return;
+            }
+            
+            // Add subdirectory based on type
+            if (driveSelect.value) {
+                selectedPath = selectedPath + (selectedPath.endsWith('\\') ? '' : '\\') + currentDirectoryType;
+            }
+            
+            fetch('/api/set-directory', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    type: currentDirectoryType,
+                    path: selectedPath
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update the display
+                    const pathElement = document.getElementById(currentDirectoryType + '-path');
+                    if (pathElement) {
+                        pathElement.textContent = selectedPath + '\\';
+                    }
+                    
+                    // Close modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('directoryModal'));
+                    modal.hide();
+                    
+                    // Show success message
+                    showMessage('Directory updated successfully!', 'success');
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error updating directory');
+            });
+        }
+        
+        function showMessage(message, type) {
+            // Create a temporary alert
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alertDiv);
+            
+            // Auto-remove after 3 seconds
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.parentNode.removeChild(alertDiv);
+                }
+            }, 3000);
+        }
+        
+        function cleanupStorage(type) {
+            if (!confirm(`Are you sure you want to clean old files from ${type}? This will delete files older than 24 hours.`)) {
+                return;
+            }
+            
+            fetch('/api/cleanup', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    type: type,
+                    max_age_hours: 24
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showMessage(data.message, 'success');
+                } else {
+                    showMessage('Error: ' + data.message, 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage('Error cleaning storage', 'danger');
+            });
+        }
+    </script>
+    
+    <!-- Directory Selector Modal -->
+    <div class="modal fade" id="directoryModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Select Directory</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Available Drives:</label>
+                        <select class="form-select" id="driveSelect">
+                            <option value="">Loading drives...</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Custom Path:</label>
+                        <input type="text" class="form-control" id="customPath" placeholder="e.g., D:\Downloads">
+                    </div>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Tip:</strong> Choose a drive with more free space to avoid storage issues.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveDirectory()">Save Directory</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

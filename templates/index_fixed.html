@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Downloader - Fixed Version</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .container {
+            max-width: 800px;
+            margin-top: 50px;
+        }
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border: none;
+        }
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 25px;
+            padding: 10px 30px;
+        }
+        .btn-success {
+            background: linear-gradient(45deg, #56ab2f, #a8e6cf);
+            border: none;
+            border-radius: 25px;
+        }
+        .btn-danger {
+            background: linear-gradient(45deg, #ff416c, #ff4b2b);
+            border: none;
+            border-radius: 25px;
+        }
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        .progress {
+            height: 25px;
+            border-radius: 15px;
+        }
+        .stream-option {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .stream-option:hover {
+            border-color: #667eea;
+            background: #e3f2fd;
+        }
+        .stream-option.selected {
+            border-color: #667eea;
+            background: #e3f2fd;
+        }
+        .video-info {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .thumbnail {
+            border-radius: 10px;
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="text-center mb-4">
+            <h1 class="text-white mb-3">
+                <i class="fas fa-video"></i> YouTube Downloader
+            </h1>
+            <p class="text-white-50">Download YouTube videos in high quality with real-time progress</p>
+        </div>
+
+        <!-- URL Input Card -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-link text-primary"></i> Enter YouTube URL
+                </h5>
+                <div class="input-group mb-3">
+                    <input type="url" id="videoUrl" class="form-control" 
+                           placeholder="https://www.youtube.com/watch?v=..." required>
+                    <button class="btn btn-primary" type="button" id="analyzeBtn">
+                        <i class="fas fa-search"></i> Analyze Video
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="loadingCard" class="card mb-4" style="display: none;">
+            <div class="card-body text-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Analyzing video...</p>
+            </div>
+        </div>
+
+        <!-- Video Info Card -->
+        <div id="videoInfoCard" class="card mb-4" style="display: none;">
+            <div class="card-body">
+                <div class="video-info">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <img id="videoThumbnail" src="" class="thumbnail" alt="Video Thumbnail">
+                        </div>
+                        <div class="col-md-8">
+                            <h5 id="videoTitle"></h5>
+                            <p class="text-muted">
+                                <i class="fas fa-user"></i> <span id="videoAuthor"></span><br>
+                                <i class="fas fa-eye"></i> <span id="videoViews"></span> views<br>
+                                <i class="fas fa-clock"></i> <span id="videoDuration"></span><br>
+                            </p>
+                            <p id="videoDescription" class="small"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Download Options Card -->
+        <div id="downloadOptionsCard" class="card mb-4" style="display: none;">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-download text-success"></i> Download Options
+                </h5>
+                
+                <!-- Mode Selection -->
+                <div class="mb-3">
+                    <label class="form-label">Download Mode:</label>
+                    <div class="btn-group w-100" role="group">
+                        <input type="radio" class="btn-check" name="downloadMode" id="videoMode" value="video" checked>
+                        <label class="btn btn-outline-primary" for="videoMode">
+                            <i class="fas fa-video"></i> Video + Audio
+                        </label>
+                        
+                        <input type="radio" class="btn-check" name="downloadMode" id="audioMode" value="audio">
+                        <label class="btn btn-outline-primary" for="audioMode">
+                            <i class="fas fa-music"></i> Audio Only
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Quality Selection -->
+                <div id="qualitySection">
+                    <label class="form-label">Select Quality:</label>
+                    <div id="streamOptions"></div>
+                </div>
+
+                <!-- Download Button -->
+                <div class="text-center mt-4">
+                    <button id="downloadBtn" class="btn btn-success btn-lg" disabled>
+                        <i class="fas fa-download"></i> Start Download
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Card -->
+        <div id="progressCard" class="card" style="display: none;">
+            <div class="card-body">
+                <h5 class="card-title text-center">
+                    <i class="fas fa-download"></i> Download Progress
+                </h5>
+                
+                <div class="progress mb-3">
+                    <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated" 
+                         role="progressbar" style="width: 0%">0%</div>
+                </div>
+                
+                <div id="statusText" class="text-center mb-3">
+                    <i class="fas fa-spinner fa-spin"></i> Initializing download...
+                </div>
+                
+                <!-- Download Complete Section -->
+                <div id="downloadCompleteSection" class="text-center" style="display: none;">
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle"></i> Download completed successfully!
+                    </div>
+                    <a id="downloadFileBtn" href="#" class="btn btn-success btn-lg">
+                        <i class="fas fa-download"></i> Download File
+                    </a>
+                </div>
+                
+                <!-- Error Section -->
+                <div id="errorSection" class="text-center" style="display: none;">
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle"></i> 
+                        <span id="errorMessage">An error occurred during download.</span>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-3">
+                    <button class="btn btn-secondary" onclick="location.reload()">
+                        <i class="fas fa-arrow-left"></i> Download Another Video
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentVideoData = null;
+        let selectedStream = null;
+        let currentDownloadId = null;
+        let progressInterval = null;
+
+        // Analyze video button
+        document.getElementById('analyzeBtn').addEventListener('click', analyzeVideo);
+        document.getElementById('videoUrl').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') analyzeVideo();
+        });
+
+        // Download mode change
+        document.querySelectorAll('input[name="downloadMode"]').forEach(radio => {
+            radio.addEventListener('change', updateStreamOptions);
+        });
+
+        // Download button
+        document.getElementById('downloadBtn').addEventListener('click', startDownload);
+
+        async function analyzeVideo() {
+            const url = document.getElementById('videoUrl').value.trim();
+            if (!url) {
+                alert('Please enter a YouTube URL');
+                return;
+            }
+
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            const loadingCard = document.getElementById('loadingCard');
+            
+            analyzeBtn.disabled = true;
+            analyzeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+            loadingCard.style.display = 'block';
+
+            try {
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: url })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    currentVideoData = data;
+                    displayVideoInfo(data);
+                    displayDownloadOptions(data);
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            } finally {
+                analyzeBtn.disabled = false;
+                analyzeBtn.innerHTML = '<i class="fas fa-search"></i> Analyze Video';
+                loadingCard.style.display = 'none';
+            }
+        }
+
+        function displayVideoInfo(data) {
+            document.getElementById('videoThumbnail').src = data.thumbnail;
+            document.getElementById('videoTitle').textContent = data.title;
+            document.getElementById('videoAuthor').textContent = data.author;
+            document.getElementById('videoViews').textContent = data.views.toLocaleString();
+            document.getElementById('videoDuration').textContent = formatDuration(data.length);
+            document.getElementById('videoDescription').textContent = data.description;
+            
+            document.getElementById('videoInfoCard').style.display = 'block';
+        }
+
+        function displayDownloadOptions(data) {
+            updateStreamOptions();
+            document.getElementById('downloadOptionsCard').style.display = 'block';
+        }
+
+        function updateStreamOptions() {
+            if (!currentVideoData) return;
+
+            const mode = document.querySelector('input[name="downloadMode"]:checked').value;
+            const streamOptions = document.getElementById('streamOptions');
+            streamOptions.innerHTML = '';
+
+            const streams = mode === 'audio' ? currentVideoData.audio_streams : currentVideoData.video_streams;
+
+            streams.forEach((stream, index) => {
+                const streamDiv = document.createElement('div');
+                streamDiv.className = 'stream-option';
+                streamDiv.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>${mode === 'audio' ? stream.quality : stream.resolution}</strong>
+                            <small class="text-muted d-block">${stream.type}</small>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-primary">${stream.size_mb} MB</span>
+                        </div>
+                    </div>
+                `;
+
+                streamDiv.addEventListener('click', function() {
+                    document.querySelectorAll('.stream-option').forEach(opt => opt.classList.remove('selected'));
+                    this.classList.add('selected');
+                    selectedStream = stream;
+                    document.getElementById('downloadBtn').disabled = false;
+                });
+
+                streamOptions.appendChild(streamDiv);
+            });
+        }
+
+        async function startDownload() {
+            if (!selectedStream) {
+                alert('Please select a quality option');
+                return;
+            }
+
+            const url = document.getElementById('videoUrl').value.trim();
+            const mode = document.querySelector('input[name="downloadMode"]:checked').value;
+
+            try {
+                const response = await fetch('/download', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        url: url,
+                        quality: selectedStream.resolution || selectedStream.quality,
+                        mode: mode
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    currentDownloadId = data.download_id;
+                    showProgressCard();
+                    startProgressPolling();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        function showProgressCard() {
+            document.getElementById('downloadOptionsCard').style.display = 'none';
+            document.getElementById('progressCard').style.display = 'block';
+        }
+
+        function startProgressPolling() {
+            progressInterval = setInterval(updateProgress, 1000);
+            updateProgress();
+        }
+
+        async function updateProgress() {
+            try {
+                const response = await fetch(`/progress/${currentDownloadId}`);
+                const data = await response.json();
+
+                const progressBar = document.getElementById('progressBar');
+                const statusText = document.getElementById('statusText');
+                const downloadCompleteSection = document.getElementById('downloadCompleteSection');
+                const errorSection = document.getElementById('errorSection');
+
+                // Update progress bar
+                progressBar.style.width = data.progress + '%';
+                progressBar.textContent = Math.round(data.progress) + '%';
+
+                // Update status
+                let statusMessage = '';
+                let statusIcon = '';
+
+                switch(data.status) {
+                    case 'starting':
+                        statusMessage = 'Starting download...';
+                        statusIcon = 'fas fa-spinner fa-spin';
+                        break;
+                    case 'downloading_audio':
+                        statusMessage = 'Downloading audio...';
+                        statusIcon = 'fas fa-music';
+                        progressBar.className = 'progress-bar progress-bar-striped progress-bar-animated bg-info';
+                        break;
+                    case 'downloading_video':
+                        statusMessage = 'Downloading video...';
+                        statusIcon = 'fas fa-video';
+                        progressBar.className = 'progress-bar progress-bar-striped progress-bar-animated bg-warning';
+                        break;
+                    case 'merging':
+                        statusMessage = 'Merging audio and video...';
+                        statusIcon = 'fas fa-cogs';
+                        progressBar.className = 'progress-bar progress-bar-striped progress-bar-animated bg-primary';
+                        break;
+                    case 'completed':
+                        statusMessage = 'Download completed!';
+                        statusIcon = 'fas fa-check-circle text-success';
+                        progressBar.className = 'progress-bar bg-success';
+                        document.getElementById('downloadFileBtn').href = `/download_file/${currentDownloadId}`;
+                        downloadCompleteSection.style.display = 'block';
+                        clearInterval(progressInterval);
+                        break;
+                    default:
+                        if (data.status.startsWith('error:')) {
+                            statusMessage = 'Download failed';
+                            statusIcon = 'fas fa-exclamation-triangle text-danger';
+                            progressBar.className = 'progress-bar bg-danger';
+                            document.getElementById('errorMessage').textContent = data.status.substring(7);
+                            errorSection.style.display = 'block';
+                            clearInterval(progressInterval);
+                        } else {
+                            statusMessage = 'Processing...';
+                            statusIcon = 'fas fa-spinner fa-spin';
+                        }
+                }
+
+                statusText.innerHTML = `<i class="${statusIcon}"></i> ${statusMessage}`;
+            } catch (error) {
+                console.error('Error fetching progress:', error);
+            }
+        }
+
+        function formatDuration(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+            
+            if (hours > 0) {
+                return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            } else {
+                return `${minutes}:${secs.toString().padStart(2, '0')}`;
+            }
+        }
+
+        // Auto-focus URL input
+        document.getElementById('videoUrl').focus();
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', function() {
+            if (progressInterval) {
+                clearInterval(progressInterval);
+            }
+        });
+    </script>
+</body>
+</html>
